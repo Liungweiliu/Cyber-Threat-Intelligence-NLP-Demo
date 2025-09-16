@@ -1,14 +1,13 @@
-# 使用一個包含 Jupyter 和科學計算工具的官方鏡像作為基礎
-FROM jupyter/scipy-notebook:latest
+FROM python:3.12-slim
 
-# 切換到工作目錄
-WORKDIR /home/jovyan/work
+ENV PATH="/home/jovyan/.local/bin:${PATH}"
 
-# 將 requirements.txt 複製到容器中
 COPY requirements.txt .
 
-# 安裝所有 Python 套件
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir jupyterlab
 
-# 啟動 Jupyter Notebook
-CMD ["jupyter", "notebook", "--ip=0.0.0.0", "--allow-root", "--notebook-dir=/home/jovyan/work"]
+WORKDIR /home/jovyan/work
+
+CMD ["jupyter-lab", "--ip=0.0.0.0", "--allow-root", "--notebook-dir=/home/jovyan/work"]
