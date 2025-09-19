@@ -31,6 +31,20 @@ API / UI: FastAPI
      → [FastAPI] → [User Query & Threat Intel Retrieval]
 ```
 
+## 📂 Data Sources
+
+## 📂 Data Sources
+
+This project leverages publicly available cyber threat intelligence reports to demonstrate information extraction and analysis. The core dataset and Indicators of Compromise (IOCs) used in this demo are derived from a detailed report by Netskope, focusing on a specific threat campaign.
+
+Specifically, the analyzed data originates from:
+
+* **Report**: "A look at the Nim-based campaign using Microsoft Word docs to impersonate the Nepali government"
+* **Source**: [Netskope Threat Labs](https://www.netskope.com/blog/a-look-at-the-nim-based-campaign-using-microsoft-word-docs-to-impersonate-the-nepali-government)
+
+This approach ensures the project's practicality and relevance by processing real-world, non-offensive threat intelligence for educational and research purposes.
+
+
 ## 📂 Project Structure
 ```
 cyber-threat-intel-nlp/
