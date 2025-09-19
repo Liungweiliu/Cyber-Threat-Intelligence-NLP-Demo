@@ -5,14 +5,10 @@ import requests
 from fire import Fire
 from langchain.chains import RetrievalQA
 from langchain_community.document_loaders import JSONLoader
-from langchain_community.llms import HuggingFacePipeline
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_qdrant.vectorstores import Qdrant
-from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams
-from transformers import pipeline
 
 from src.datamodel.qdrant import qdrant_datamodel
+from src.model.llm import get_hf_llm_model, get_llm_model
 
 
 def get_embedding_model(
@@ -61,25 +57,6 @@ def download_file(
     except requests.exceptions.RequestException as e:
         print(f"發生網路錯誤: {e}")
     return save_path
-
-
-def get_llm_model():
-    import getpass
-    import os
-
-    if not os.environ.get("OPENAI_API_KEY"):
-        os.environ["OPENAI_API_KEY"] = getpass.getpass("Enter API key for OpenAI: ")
-
-    from langchain.chat_models import init_chat_model
-
-    llm = init_chat_model("gpt-4o-mini", model_provider="openai")
-    return llm
-
-
-def get_hf_llm_model() -> HuggingFacePipeline:
-    hf_pipeline = pipeline("text-generation", model="distilgpt2", max_new_tokens=100)
-    llm = HuggingFacePipeline(pipeline=hf_pipeline)
-    return llm
 
 
 # Define the metadata extraction function.
