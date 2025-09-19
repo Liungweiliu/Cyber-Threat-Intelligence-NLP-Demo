@@ -33,8 +33,6 @@ API / UI: FastAPI
 
 ## 📂 Data Sources
 
-## 📂 Data Sources
-
 This project leverages publicly available cyber threat intelligence reports to demonstrate information extraction and analysis. The core dataset and Indicators of Compromise (IOCs) used in this demo are derived from a detailed report by Netskope, focusing on a specific threat campaign.
 
 Specifically, the analyzed data originates from:
