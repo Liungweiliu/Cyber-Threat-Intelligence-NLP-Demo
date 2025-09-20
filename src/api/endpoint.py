@@ -11,7 +11,7 @@ async def health_check():
     return {"status": "ok"}
 
 
-@router.post("/api/analysis/sigma/query", response_model=QueryResponse)
+@router.post("/analysis/sigma/query", response_model=QueryResponse)
 async def query_endpoint(input: QueryRequest):
     result = qa_model.invoke(input.query)
     return QueryResponse(query=result.get("query"), answer=result.get("result"))
