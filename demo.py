@@ -1,106 +1,40 @@
-import json
-import os
-
-import requests
 from fire import Fire
 from langchain.chains import RetrievalQA
-from langchain_community.document_loaders import JSONLoader
-from langchain_huggingface import HuggingFaceEmbeddings
-
-from src.datamodel.qdrant import qdrant_datamodel
-from src.model.llm import get_hf_llm_model, get_llm_model
-
-
-def get_embedding_model(
-    model_name: str = "sentence-transformers/all-MiniLM-L6-v2",
-) -> HuggingFaceEmbeddings:
-    return HuggingFaceEmbeddings(model_name=model_name)
+from src.datamodels.qdrant import qdrant_datamodel
+from src.datamodels.constant import COLLECTION_NAME
+from src.models.llm import get_llm_model
+from src.models.huggingface import get_embedding_model
+from src.ingestion.load_data import download_file, load_json
 
 
-def _check_file_exist(path: str) -> bool:
-    return os.path.exists(path)
-
-
-def download_file(
-    file_hash: str = "b5c001cbcd72b919e9b05e3281cc4e4914fee0748b3d81954772975630233a6e",
-) -> str:
-    VIRUSTOTAL_API_KEY = os.getenv("VIRUSTOTAL_API_KEY")
-    save_path = f"virustotal_report_{file_hash}.json"
-    if _check_file_exist(path=save_path):
-        print("File exists")
-        return save_path
-    # API 端點
-    url = f"https://www.virustotal.com/api/v3/files/{file_hash}"
-
-    headers = {"x-apikey": VIRUSTOTAL_API_KEY, "Accept": "application/json"}
-
-    try:
-        # 發送 GET 請求
-        print(f"查詢檔案雜湊值: {file_hash}")
-        response = requests.get(url, headers=headers)
-
-        # 檢查回應狀態碼
-        if response.status_code == 200:
-            report = response.json()
-
-            # 將 JSON 報告存檔
-            with open(save_path, "w") as f:
-                json.dump(report, f, indent=4)
-            print(f"成功下載報告，已儲存為 virustotal_report_{file_hash}.json")
-
-        elif response.status_code == 404:
-            print(f"錯誤：找不到此檔案雜湊值 {file_hash} 的報告。")
-        else:
-            print(f"API 請求失敗，狀態碼：{response.status_code}")
-            print(f"回應內容：{response.text}")
-
-    except requests.exceptions.RequestException as e:
-        print(f"發生網路錯誤: {e}")
-    return save_path
-
-
-# Define the metadata extraction function.
-def metadata_func(record: dict, metadata: dict) -> dict:
-    columns = [
-        "rule_level",
-        "rule_id",
-        "rule_source",
-        "rule_title",
-        "rule_description",
-        "rule_author",
-        "match_context",
-    ]
-    for column in columns:
-        metadata[column] = record.get(column)
-    return metadata
-
-
-def main(collection_name: str = "sigma_analysis_collection"):
+def ingest_collection(collection_name: str = COLLECTION_NAME) -> None:
     save_path = download_file()
-    client = qdrant_datamodel.get_client()
     embedding = get_embedding_model()
 
-    if not client.collection_exists(collection_name=collection_name):
-        loader = JSONLoader(
-            file_path=save_path,
-            jq_schema=".data.attributes.sigma_analysis_results[]",
-            content_key="rule_description",
-            metadata_func=metadata_func,
-        )
-        report = loader.load()
-        qdrant_datamodel.create(collection_name=collection_name)
-        vectorstore = qdrant_datamodel.create_vectorstore(
-            documents=report, embedding=embedding, collection_name=collection_name
-        )
+    report = load_json(
+        file_path=save_path,
+        jq_schema=".data.attributes.sigma_analysis_results[]",
+        content_key="rule_description",
+    )
+    qdrant_datamodel.create_collection(collection_name=collection_name)
+    vectorstore = qdrant_datamodel.create_vectorstore(
+        documents=report, embedding=embedding, collection_name=collection_name
+    )
 
-    else:
-        print(f"{'':=>20} {collection_name=} exist, connect without create.")
-        embedding = get_embedding_model()
-        vectorstore = qdrant_datamodel.get_vectorstore(
-            client=client,
-            collection_name=collection_name,
-            embedding=embedding,
-        )
+
+def main(collection_name: str = COLLECTION_NAME):
+    embedding = get_embedding_model()
+    client = qdrant_datamodel.create_client(host="localhost", port=6333)
+    if not client.collection_exists(collection_name=collection_name):
+        ingest_collection(collection_name=collection_name)
+
+    print(f"{'':=>20} {collection_name=} exist, connect without create.")
+    embedding = get_embedding_model()
+    vectorstore = qdrant_datamodel.get_vectorstore(
+        client=client,
+        collection_name=collection_name,
+        embedding=embedding,
+    )
 
     llm = get_llm_model()
 
@@ -116,14 +50,14 @@ def main(collection_name: str = "sigma_analysis_collection"):
     for question in questions:
         result = qa.invoke(question)
         query = result.get("query")
-        result = result.get("result")
+        answer = result.get("result")
         print(
             f"""{'':=>20} 
 {query=} 
-{result=}"""
+{answer=}"""
         )
 
 
 if __name__:
-    Fire({"main": main})
-# python -um demo main
+    Fire({"main": main, "ingest_collection": ingest_collection})
+# python -um demo ingest_collection

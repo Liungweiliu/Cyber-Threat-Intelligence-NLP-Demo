@@ -12,7 +12,6 @@ services:
     volumes:
       - ./qdrant_storage:/qdrant/storage
     restart: always
-
   notebook:
     build:
       context: .
@@ -21,11 +20,28 @@ services:
     ports:
       - "8888:8888"
     volumes:
-      - .:/home/jovyan/work
-    working_dir: /home/jovyan/work
+      - .:/home/liangwei/work
+    working_dir: /home/liangwei/work
     env_file:
       - .env
     environment:
       - JUPYTER_ENABLE_LAB=yes
+    command: >
+      jupyter-lab --ip=0.0.0.0 --allow-root --notebook-dir=/home/liangwei/work
+    depends_on:
+      - qdrant
+  fastapi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fastapi-service
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/home/liangwei/work
+    env_file:
+      - .env
+    command: >
+      uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000
     depends_on:
       - qdrant
