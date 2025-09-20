@@ -29,19 +29,19 @@ def download_file(
         if response.status_code == 200:
             report = response.json()
 
-            # 將 JSON 報告存檔
+            # Save report as json
             with open(save_path, "w") as f:
                 json.dump(report, f, indent=4)
-            print(f"成功下載報告，已儲存為 virustotal_report_{file_hash}.json")
+            print(f"Save file in {save_path}")
 
         elif response.status_code == 404:
-            print(f"錯誤：找不到此檔案雜湊值 {file_hash} 的報告。")
+            print(f"Error! Can't download {file_hash} report。")
         else:
-            print(f"API 請求失敗，狀態碼：{response.status_code}")
-            print(f"回應內容：{response.text}")
+            print(f"API request fail {response.status_code=}")
+            print(f"{response.text=}")
 
     except requests.exceptions.RequestException as e:
-        print(f"發生網路錯誤: {e}")
+        print(f"RequestException: {e}")
     return save_path
 
 
