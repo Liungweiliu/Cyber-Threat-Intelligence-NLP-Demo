@@ -58,7 +58,6 @@ API / UI: FastAPI
 ```
 cyber-threat-intel-nlp/
 │── data/                # APT reports (json)
-│── notebooks/           # Prototypes & EDA
 │── src/
 │   ├── api/             # FastAPI demo services
 │   ├── ingestion/       # Data loaders
@@ -68,6 +67,7 @@ cyber-threat-intel-nlp/
 │── docker-compose.yml
 │── Pipfile              
 │── requirements.txt
+│── demo.ipynb
 │── README.md
 ```
 
@@ -87,6 +87,7 @@ To get the project up and running, follow these steps:
      ```
 3. **Access Services**: Once the containers are running, you can access the various services at the following URLs:
      - Jupyter Notebook: http://localhost:8888
+          * **[View Demo Notebook](demo.ipynb)**
      - Qdrant Dashboard: http://localhost:6333/dashboard
           ![Image Alt Text](image/qdrant.png)
      - FastAPI Docs: http://localhost:8000/docs
