@@ -1,10 +1,11 @@
 from fire import Fire
 from langchain.chains import RetrievalQA
-from src.datamodels.qdrant import qdrant_datamodel
+
 from src.datamodels.constant import COLLECTION_NAME
-from src.models.llm import get_llm_model
-from src.models.huggingface import get_embedding_model
+from src.datamodels.qdrant import qdrant_datamodel
 from src.ingestion.load_data import download_file, load_json
+from src.models.huggingface import get_embedding_model
+from src.models.llm import get_llm_model
 
 
 def ingest_collection(collection_name: str = COLLECTION_NAME) -> None:
@@ -13,8 +14,8 @@ def ingest_collection(collection_name: str = COLLECTION_NAME) -> None:
 
     report = load_json(
         file_path=save_path,
-        jq_schema=".data.attributes.sigma_analysis_results[]",
-        content_key="rule_description",
+        jq_schema='.data.attributes.sigma_analysis_results[] | {full_content: (.rule_title + " " + .rule_description + " " + .rule_level + " " + .rule_id), rule_id: .rule_id, rule_source: .rule_source, rule_title: .rule_title, rule_level: .rule_level, rule_description: .rule_description, rule_author: .rule_author, match_context: .match_context}',
+        content_key="full_content",
     )
     qdrant_datamodel.create_collection(collection_name=collection_name)
     vectorstore = qdrant_datamodel.create_vectorstore(
