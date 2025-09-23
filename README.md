@@ -2,8 +2,8 @@
 **APT Report Information Extraction & Semantic Retrieval (POC)**  
 
 ## 📌 Overview  
-This project demonstrates how to use **NLP + LLM + Vector Databases** to automatically extract and retrieve **threat intelligence (Indicators of Compromise, IOCs)** from Advanced Persistent Threat (APT) reports.  
-It provides a **natural language Q&A interface** to help security analysts quickly access key findings from reports.  
+This project showcases the design and implementation of a **Retrieval-Augmented Generation (RAG) system** for cyber threat intelligence.
+It provides a **natural language Q&A interface** to help security analysts to instantly retrieve key information with natural language queries. By combining **Huggingface embeddings, Qdrant, and LangChain**, this demo provides a clear pathway to building scalable and efficient AI-powered security features.
 
 ## 🏗️ Architecture  
 ![Image Alt Text](image/architecture.png)
@@ -13,7 +13,7 @@ It provides a **natural language Q&A interface** to help security analysts quick
      → [FastAPI] → [User Query & Threat Intel Retrieval]
 ```
 ## 🎯 Features  
-This project's workflow is divided into two main parts: Vector Database Ingestion and API Inference.
+This project's workflow is divided into two main parts: **Vector Database Ingestion** and **API Inference.**
 
 ### 1. Vector Database Ingestion
 This stage focuses on processing raw threat intelligence reports into a format suitable for retrieval.
